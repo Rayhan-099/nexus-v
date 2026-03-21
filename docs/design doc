@@ -1,0 +1,126 @@
+System & UI/UX Design Document
+Project: Nexus-V
+Objective: Define the visual language, database schemas, and API/WebSocket communication layer for the MVP.
+
+1. UI/UX Visual Identity: "Precision Modernism"
+To stand out, Nexus-V will avoid standard, boring corporate templates. It needs to feel like the dashboard of a high-end electric vehicle.
+
+A. Global Styling (The Vibe)
+Theme: Dark Mode Default. It reduces glare, saves battery (relevant for EV users), and makes brightly colored data metrics "pop."
+
+Design Language: Glassmorphism. Semi-transparent, blurred backgrounds for cards and modals to give a sense of depth and hierarchy over a dark, sleek background.
+
+Typography:
+
+Headers: Orbitron or Montserrat (Bold, geometric, tech-forward).
+
+Body/Data: Inter or Roboto Mono (Clean, highly legible for numbers and wait times).
+
+B. Color Palette
+Background: Deep Space Blue (#0B132B) transitioning to Void Black (#000000).
+
+Primary Accent (Brand): Electric Cyan (#00F2FF). Used for active navigation, borders, and general highlights.
+
+Functional Colors (The "Glance" System):
+
+🟢 Success/Available: Neon Green (#39FF14) – EV slot open, queue joined.
+
+🟡 Pending/Warning: Alert Amber (#FFB000) – Waiting in queue, pending mechanic approval.
+
+🔴 Action Required/Offline: Crimson Red (#FF2A2A) – Broken charger, urgent brake replacement needed.
+
+2. Database Schema (MongoDB / Mongoose)
+Since you are dealing with distinct types of services (Washing, EV, Repair), a NoSQL database is perfect. Here is the MVP schema design.
+
+A. User Collection (users)
+Stores driver profiles and their active states.
+
+JSON
+{
+  "_id": "ObjectId",
+  "name": "String",
+  "phone": "String",
+  "vehicleType": "String (ICE | EV)",
+  "activeQueueId": "ObjectId (null if not in queue)",
+  "activeEVSlotId": "ObjectId (null if not booked)"
+}
+B. Partner Collection (partners)
+Stores the garages, car washes, and charging stations.
+
+JSON
+{
+  "_id": "ObjectId",
+  "businessName": "String",
+  "type": "String (WASH | REPAIR | EV_STATION)",
+  "location": { "lat": "Number", "lng": "Number" },
+  "status": "String (OPEN | CLOSED)",
+  "metrics": {
+     "currentQueueLength": "Number",
+     "avgWaitTimeMins": "Number"
+  }
+}
+C. Trust Engine Records (service_proofs)
+The ledger for the mechanic's visual proof and user approval.
+
+JSON
+{
+  "_id": "ObjectId",
+  "partnerId": "ObjectId",
+  "userId": "ObjectId",
+  "imageUrl": "String (AWS S3 or Cloudinary link)",
+  "description": "String (e.g., 'Worn out brake pads')",
+  "estimatedCost": "Number",
+  "status": "String (PENDING | APPROVED | REJECTED)",
+  "timestamp": "Date"
+}
+D. EV Charging Slots (ev_slots)
+Individual chargers tied to a specific partner location.
+
+JSON
+{
+  "_id": "ObjectId",
+  "stationId": "ObjectId",
+  "hardwareId": "String",
+  "status": "String (AVAILABLE | BOOKED | CHARGING | OFFLINE)",
+  "bookedBy": "ObjectId (UserId, null if available)",
+  "bookingExpiresAt": "Date (15 mins from booking)"
+}
+3. API & WebSocket Architecture
+To achieve the "Zero Latency" feel, Nexus-V splits communication into REST (for static actions) and WebSockets (for live data).
+
+A. REST API Endpoints (Express.js)
+GET /api/partners/nearby?type=WASH&lat=...&lng=...
+
+Action: Fetches a list of nearby service centers.
+
+POST /api/trust/upload-proof
+
+Action: Mechanic uploads an image. Hits the Python microservice for basic validation, stores it, and creates a service_proof record.
+
+PATCH /api/trust/resolve-proof/:id
+
+Action: User clicks "Approve" or "Reject". Updates the database and alerts the mechanic.
+
+B. Real-Time Socket.io Events
+This is the core of the app's "wow" factor during the demo.
+
+Event: join_queue
+
+Flow: User emits. Server adds them to the partner's queue array -> Server broadcasts queue_updated to all users viewing that garage to update the "Cars Ahead" counter instantly.
+
+Event: ev_slot_reserved
+
+Flow: User emits. Server marks slot as BOOKED and starts the 15-minute TTL (Time-To-Live). Server broadcasts station_status_change so the charger turns "Yellow" on everyone else's map.
+
+Event: proof_received
+
+Flow: Triggered by the backend after a mechanic uploads a photo. Pushes a real-time notification to the specific User's app: "Action Required: Review Brake Pad Cost."
+
+4. The Python Microservice (The "Trust" Validator)
+While the main backend is Node.js, your Python service runs independently.
+
+Input: Receives an image from the Node backend.
+
+Process: Uses OpenCV/Pillow to check image validity (e.g., rejecting pitch-black images or heavily blurred photos before sending them to the user).
+
+Output: Returns a boolean (isValid: true/false) back to Node.js.

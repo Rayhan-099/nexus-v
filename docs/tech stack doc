@@ -1,0 +1,89 @@
+Technical Stack & System Workflow Document
+Project: Nexus-V
+Architecture Style: Microservices (Node.js Core + Python AI/Vision Engine)
+
+1. The Tech Stack
+A. Frontend (User App & Partner Dashboard)
+Framework: React.js (for the Partner Web Dashboard) and React Native (for the Mobile App). Hackathon Tip: If time is tight, build a responsive React.js Progressive Web App (PWA) for both to share components.
+
+Styling: Tailwind CSS. Essential for rapidly building the "Precision Modernism" glassmorphism UI without writing endless custom CSS files.
+
+3D/Visuals (Optional 'Wow' Factor): Three.js. You can use this to render a lightweight 3D interactive car model on the dashboard to show which part the mechanic is fixing.
+
+State Management: Zustand or Redux Toolkit (Zustand is faster to set up for hackathons) to manage live queue states and EV slot timers globally.
+
+B. Backend (The Real-Time Core)
+Runtime & Framework: Node.js with Express.js. Fast, asynchronous, and perfect for handling thousands of rapid API calls.
+
+Real-Time Engine: Socket.io. This is non-negotiable. It provides the bi-directional communication needed for the live queue counters and instant EV slot status changes.
+
+Authentication: JSON Web Tokens (JWT). Keep it stateless and fast.
+
+C. Microservice (The "Trust Engine")
+Framework: Python with FastAPI (or Flask). FastAPI is incredibly fast and self-documents, which is great for hackathons.
+
+Computer Vision: OpenCV. When a mechanic uploads a photo, this library quickly analyzes the image to ensure it isn't pitch-black, excessively blurry, or a duplicate, acting as your automated fraud-prevention layer.
+
+D. Database & Storage
+Database: MongoDB (with Mongoose ODM). Its document-based structure easily handles the varied data shapes of car washes, EV stations, and complex mechanic quotes.
+
+Image Storage: Cloudinary or AWS S3. Hackathon Tip: Cloudinary is usually easier to set up in 10 minutes and gives you free image optimization URLs.
+
+E. Deployment (Hackathon Ready)
+Frontend: Vercel (Instant deployments from GitHub).
+
+Node Backend: Render or Railway (Easy WebSockets support).
+
+Python Microservice: Render (Deploys FastAPI seamlessly).
+
+Database: MongoDB Atlas (Free cloud cluster).
+
+2. The Full System Workflow (How Data Moves)
+Here is the exact lifecycle of the two most critical actions in your app.
+
+Workflow A: The "Trust Layer" (Mechanic Uploads Proof)
+This flow proves to the judges that your app stops fraud in real-time.
+
+Trigger: Mechanic takes a photo of worn brake pads and enters a ₹5,000 quote on the React Partner Dashboard.
+
+Upload & Route: The React frontend sends the image file to the Node.js/Express Server.
+
+Microservice Handoff: Node.js temporarily holds the request and forwards the image to the Python/FastAPI Trust Engine.
+
+Vision Validation: Python uses OpenCV to check the image's blur variance and brightness.
+
+If Invalid (e.g., blurry): Python returns false. Node.js rejects the upload and tells the mechanic to retake it.
+
+If Valid: Python returns true.
+
+Storage & Ledger: Node.js uploads the image to Cloudinary, then saves the quote data and image URL into MongoDB.
+
+Real-Time Alert: Node.js uses Socket.io to emit a proof_received event directly to the specific User’s React Native app.
+
+Resolution: The User receives a push notification, views the image, and clicks "Approve." A final REST API call updates the MongoDB document status to APPROVED.
+
+Workflow B: The "EV Slot Booking" (Zero Latency)
+This flow demonstrates how you eliminate "Charge Anxiety."
+
+Trigger: Driver opens the app. The React frontend opens a Socket.io connection to the Node.js server.
+
+Initial State: Node.js queries MongoDB for nearby EV stations and sends the current availability (e.g., Charger A is Green/Available).
+
+Action: Driver clicks "Reserve" on Charger A.
+
+State Change: Node.js updates MongoDB, setting Charger A to BOOKED and starting a 15-minute expiration timer.
+
+Global Broadcast: Node.js instantly emits a station_status_change event via Socket.io to every other user currently looking at the map. Charger A turns Yellow/Red on their screens without them refreshing the app.
+
+Arrival: The driver arrives and clicks "Start Charging" (simulated via API), locking the slot.
+
+3. Repository Structure (Best Practice)
+Keep your code organized to show the judges you know how to build professional software:
+
+Plaintext
+nexus-v-monorepo/
+│
+├── client-app/           # React Native / React.js User App
+├── partner-dashboard/    # React.js web portal
+├── backend-core/         # Node.js + Express + Socket.io
+└── trust-engine/         # Python + FastAPI + OpenCV

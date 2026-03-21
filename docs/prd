@@ -1,0 +1,84 @@
+Product Requirements Document (PRD)
+Project Name: Nexus-V
+Theme: Smart Mobility & Digital Infrastructure
+Document Status: MVP Draft (Hackathon Version)
+
+1. Executive Summary
+The Problem: Automotive services (washing, repairing, EV charging) suffer from high information asymmetry, resulting in wasted time, hidden costs, and "charge anxiety" for drivers.
+The Solution: Nexus-V is a unified, real-time platform that connects drivers to service providers. It replaces verbal guesswork with a data-driven "Smart Experience" featuring live queues, mandatory digital proof for repairs, and real-time EV slot booking.
+The Goal: Deliver a working prototype demonstrating the real-time sync between a customer app and a partner dashboard across three service verticals.
+
+2. Target Personas
+Persona A: The Modern Driver (End User)
+
+Needs: Transparency in pricing, zero physical waiting time, guaranteed EV charging availability.
+
+Pain Points: Sitting in wash queues, getting scammed by mechanics, driving to broken/occupied EV chargers.
+
+Persona B: The Service Partner (Garage/Wash/EV Owner)
+
+Needs: Steady customer flow, dispute-free transactions, easy-to-use digital management tools.
+
+Pain Points: Idle service bays, customers arguing over bills, phone constantly ringing for updates.
+
+3. Core Features & User Stories (MVP Scope)
+Module 1: The Zero-Wait Wash (Live Queue System)
+Objective: Eliminate physical waiting lines at car washes.
+
+User Story (Driver): As a driver, I want to see the live queue status of nearby car washes so I can join the line remotely and arrive exactly when it’s my turn.
+
+User Story (Partner): As a wash owner, I want a dashboard to update the status of cars (e.g., "Washing," "Finished") so the queue advances automatically for incoming customers.
+
+MVP Requirements:
+
+Map/List view of nearby car washes with a live "Cars Ahead" counter.
+
+"Join Queue" button with an estimated time of arrival (ETA) calculation.
+
+Partner toggle to mark a bay as "Free" or "Occupied."
+
+Module 2: Verifiable Repairs (The Trust Engine)
+Objective: Eliminate unauthorized mechanic upcharges through digital proof.
+
+User Story (Partner): As a mechanic, I want to upload a photo of a damaged part and a price quote so the customer can review it remotely.
+
+User Story (Driver): As a driver, I want to receive a push notification with photographic proof of new damage, allowing me to click "Approve" or "Reject" before work continues.
+
+MVP Requirements:
+
+Partner portal interface for uploading images/videos and inputting a quote.
+
+Basic image validation (ensuring an image is actually attached).
+
+Customer interface showing the image, description, and an "Approve/Reject" state toggle.
+
+Immutable logging of the approved quote to prevent end-of-service disputes.
+
+Module 3: Guaranteed EV Charging (Real-Time Booking)
+Objective: Eliminate "Charge Anxiety" by securing functional charging slots.
+
+User Story (Driver): As an EV owner, I want to see which chargers are currently functioning and available, and reserve one for 15 minutes while I drive there.
+
+User Story (System): As the backend system, I need to instantly update a charger's status to "Red/Offline" if it is booked or reported broken.
+
+MVP Requirements:
+
+Status indicators for chargers: Green (Available), Yellow (Reserved), Red (Occupied/Offline).
+
+A 15-minute countdown timer upon reservation; if the user doesn't check-in, the slot returns to Green.
+
+4. Non-Functional Requirements (NFRs)
+Real-Time Latency: Queue updates and approval notifications must reflect on the client side in under 2 seconds (crucial for the live demo).
+
+Cross-Platform UI: The customer-facing side should look and feel like a native mobile experience (even if built as a responsive web app for the hackathon).
+
+Reliability (Hackathon Context): The backend must gracefully handle concurrent requests so the demo doesn't crash when multiple judges test it simultaneously.
+
+5. Out of Scope (Post-Hackathon Roadmap)
+Do not build these for the hackathon, but mention them in the pitch as future scalability.
+
+Integration with actual EV hardware APIs (OCPP).
+
+Complex payment gateway integrations (use dummy escrow buttons for the demo).
+
+AI-based automated damage detection (keep the image verification simple or simulated for now).
