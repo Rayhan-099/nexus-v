@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import { Camera, Zap, CheckCircle, XCircle, LogOut, Map, LayoutDashboard, Settings, User as UserIcon } from 'lucide-react';
+import { Camera, Zap, CheckCircle, XCircle, LogOut, Map, LayoutDashboard, Settings, User as UserIcon, Wallet, ArrowUpCircle, ArrowDownCircle, IndianRupee, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -8,14 +8,38 @@ import { useNavigate } from 'react-router-dom';
 const socket = io('http://localhost:5000');
 const MOCK_PARTNER_ID = "000000000000000000000000";
 
+const WASH_PRICE = 499;
+const EV_PRICE = 250;
+
 export default function Dashboard() {
   const [queueLength, setQueueLength] = useState(2);
   const [inQueue, setInQueue] = useState(false);
   const [evStatus, setEvStatus] = useState('AVAILABLE');
   const [proofAlert, setProofAlert] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(5000);
+  const [transactions, setTransactions] = useState([]);
+  const [showTopUp, setShowTopUp] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState(1000);
+  const [paymentMsg, setPaymentMsg] = useState('');
   
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+
+  // Fetch wallet balance on mount
+  useEffect(() => {
+    if (token) {
+      fetch('http://localhost:5000/api/wallet/balance', {
+        headers: { 'x-auth-token': token }
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.balance !== undefined) setWalletBalance(data.balance);
+          if (data.transactions) setTransactions(data.transactions);
+        })
+        .catch(() => {});
+    }
+  }, [token]);
 
   useEffect(() => {
     socket.on('queue_updated', (data) => {
@@ -39,16 +63,64 @@ export default function Dashboard() {
     navigate('/login');
   };
 
-  const joinWashQueue = () => {
-    setInQueue(true);
-    const newLen = queueLength + 1;
-    setQueueLength(newLen);
-    socket.emit('join_queue', { partnerId: MOCK_PARTNER_ID, newLength: newLen });
+  const makePayment = async (amount, serviceType, description) => {
+    if (!token) return;
+    try {
+      const res = await fetch('http://localhost:5000/api/wallet/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+        body: JSON.stringify({ amount, serviceType, description })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setWalletBalance(data.newBalance);
+        setTransactions(prev => [data.transaction, ...prev].slice(0, 10));
+        setPaymentMsg(`✅ ₹${amount} paid!`);
+        setTimeout(() => setPaymentMsg(''), 3000);
+        return true;
+      } else {
+        setPaymentMsg(`❌ ${data.error}`);
+        setTimeout(() => setPaymentMsg(''), 3000);
+        return false;
+      }
+    } catch { return false; }
   };
 
-  const reserveEVSlot = () => {
-    setEvStatus('BOOKED');
-    socket.emit('ev_slot_reserved', { stationId: MOCK_PARTNER_ID, slotId: 'slot1' });
+  const handleTopUp = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch('http://localhost:5000/api/wallet/top-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+        body: JSON.stringify({ amount: topUpAmount })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setWalletBalance(data.newBalance);
+        setTransactions(prev => [data.transaction, ...prev].slice(0, 10));
+        setShowTopUp(false);
+        setPaymentMsg(`✅ ₹${topUpAmount} added!`);
+        setTimeout(() => setPaymentMsg(''), 3000);
+      }
+    } catch {}
+  };
+
+  const joinWashQueue = async () => {
+    const paid = await makePayment(WASH_PRICE, 'WASH_PAYMENT', 'QuickWash Queue Entry');
+    if (paid) {
+      setInQueue(true);
+      const newLen = queueLength + 1;
+      setQueueLength(newLen);
+      socket.emit('join_queue', { partnerId: MOCK_PARTNER_ID, newLength: newLen });
+    }
+  };
+
+  const reserveEVSlot = async () => {
+    const paid = await makePayment(EV_PRICE, 'EV_PAYMENT', 'EV Charge Sector - 15min Reserve');
+    if (paid) {
+      setEvStatus('BOOKED');
+      socket.emit('ev_slot_reserved', { stationId: MOCK_PARTNER_ID, slotId: 'slot1' });
+    }
   };
 
   const resolveProof = async (status) => {
@@ -219,7 +291,7 @@ export default function Dashboard() {
                     QUEUE POSITION LOCKED
                 </motion.div>
             ) : (
-                <button onClick={joinWashQueue} className="glass-button w-full py-4 text-lg">ENTER LIVE QUEUE</button>
+                <button onClick={joinWashQueue} className="glass-button w-full py-4 text-lg">ENTER LIVE QUEUE • ₹{WASH_PRICE}</button>
             )}
           </motion.div>
 
@@ -239,10 +311,71 @@ export default function Dashboard() {
               </div>
             </div>
             {evStatus === 'AVAILABLE' ? (
-                <button onClick={reserveEVSlot} className="glass-button w-full py-3">RESERVE (15m)</button>
+                <button onClick={reserveEVSlot} className="glass-button w-full py-3">RESERVE (15m) • ₹{EV_PRICE}</button>
             ) : (
                 <button disabled className="glass-button w-full py-3 opacity-50 cursor-not-allowed border-slate-500 text-slate-500 bg-transparent shadow-none hover:bg-transparent">UNAVAILABLE</button>
             )}
+          </motion.div>
+
+          {/* Wallet Card */}
+          <motion.div variants={itemVariants} className="glass-card p-6 border-t-4 border-t-[#A855F7] flex flex-col justify-between lg:col-span-2">
+            <div>
+              <div className="flex justify-between items-start mb-4">
+                  <h3 className="font-orbitron font-bold text-xl text-white flex items-center gap-2"><Wallet className="text-[#A855F7]" size={22}/> Nexus Wallet</h3>
+                  <button onClick={() => setShowTopUp(!showTopUp)} className="flex items-center gap-1 text-sm bg-[#A855F7]/20 text-[#A855F7] px-3 py-1.5 rounded-full border border-[#A855F7]/30 hover:bg-[#A855F7]/30 transition-all font-bold">
+                    <Plus size={14}/> TOP UP
+                  </button>
+              </div>
+              <div className="flex items-baseline gap-2 mb-4">
+                <motion.span key={walletBalance} initial={{ scale: 1.2, color: '#A855F7' }} animate={{ scale: 1, color: '#fff' }} className="text-4xl font-orbitron font-bold text-white">₹{walletBalance?.toLocaleString()}</motion.span>
+                <span className="text-xs text-slate-500 uppercase tracking-widest">Available</span>
+              </div>
+
+              {/* Top-up Panel */}
+              <AnimatePresence>
+                {showTopUp && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-4 bg-black/30 p-4 rounded-xl border border-[#A855F7]/20">
+                    <p className="text-xs text-slate-400 mb-2 uppercase tracking-widest">Select Amount</p>
+                    <div className="grid grid-cols-4 gap-2 mb-3">
+                      {[500, 1000, 2000, 5000].map(amt => (
+                        <button key={amt} onClick={() => setTopUpAmount(amt)} className={`py-2 rounded-lg text-sm font-bold border transition-all ${
+                          topUpAmount === amt ? 'bg-[#A855F7]/20 border-[#A855F7]/50 text-[#A855F7]' : 'bg-black/30 border-white/5 text-slate-400 hover:border-[#A855F7]/30'
+                        }`}>₹{amt}</button>
+                      ))}
+                    </div>
+                    <button onClick={handleTopUp} className="glass-button w-full border-[#A855F7] text-[#A855F7] hover:bg-[#A855F7]/20">ADD ₹{topUpAmount} VIA UPI</button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Payment Toast */}
+              <AnimatePresence>
+                {paymentMsg && (
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-4 text-sm font-bold text-center text-[#A855F7] bg-[#A855F7]/10 p-2 rounded-lg border border-[#A855F7]/20">
+                    {paymentMsg}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Transaction History */}
+              <div>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">Recent Activity</p>
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                  {transactions.length === 0 && <p className="text-xs text-slate-600 italic">No transactions yet. Use a service to get started!</p>}
+                  {transactions.map((tx, i) => (
+                    <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="flex items-center justify-between bg-black/20 p-2.5 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        {tx.amount > 0 ? <ArrowUpCircle size={16} className="text-success"/> : <ArrowDownCircle size={16} className="text-danger"/>}
+                        <span className="text-xs text-slate-300 truncate max-w-[180px]">{tx.description}</span>
+                      </div>
+                      <span className={`font-orbitron text-sm font-bold ${tx.amount > 0 ? 'text-success' : 'text-danger'}`}>
+                        {tx.amount > 0 ? '+' : ''}₹{Math.abs(tx.amount)}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </motion.div>
 
           {/* Trust Engine Card */}

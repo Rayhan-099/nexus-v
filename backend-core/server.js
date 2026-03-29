@@ -28,6 +28,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/partners', require('./routes/partners'));
 app.use('/api/trust', require('./routes/trust'));
+app.use('/api/wallet', require('./routes/wallet'));
 
 // Socket.io logic
 io.on('connection', (socket) => {
