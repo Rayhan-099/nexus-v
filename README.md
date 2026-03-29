@@ -14,6 +14,7 @@ Nexus-V is a premium, high-fidelity platform designed to consolidate automotive 
 - **QuickWash Queue**: Join digital lines at partner locations and track your position in real-time.
 - **EV Station Array**: Monitor and book available charging slots with live status updates.
 - **Trust Engine**: View AI-validated photographic evidence of repairs to ensure total transparency.
+- **Nexus Wallet**: Mock digital wallet with ₹5,000 starting credits, UPI-style top-up, and full transaction history.
 
 ### 🏢 For Partners (Partner Portal)
 - **Bento Command Center**: A professional-grade interface to manage live operations.
@@ -35,8 +36,9 @@ Nexus-V is a premium, high-fidelity platform designed to consolidate automotive 
 ### Backend
 - **Node.js** & **Express**
 - **Socket.IO** (Real-time bi-directional telemetry)
-- **MongoDB** (Persistant storage for Users, Partners, and Service History)
+- **MongoDB** (Persistent storage for Users, Partners, and Service History)
 - **JWT** (Secure, role-based authentication)
+- **Google Gemini AI** (Vision API for Trust Engine image analysis)
 
 ---
 
@@ -121,8 +123,9 @@ We've moved away from standard "centered" forms to high-impact **Split-Screen** 
 - [x] **Phase 1**: Core MVP & Socket System
 - [x] **Phase 2**: JWT Authentication & Role-based access
 - [x] **Phase 3**: Premium UI/UX Overhaul (Pro-max Aesthetics)
-- [ ] **Phase 4**: Stripe Payment Integration (Test Mode)
-- [ ] **Phase 5**: Advanced Gemini AI Vision for the Trust Engine (Automated damage assessment)
+- [x] **Phase 4**: Gemini AI Vision Trust Engine
+- [x] **Phase 5**: Mock Wallet Payment System
+- [ ] **Phase 6**: Cloud Deployment (Vercel/Render)
 
 ---
 
