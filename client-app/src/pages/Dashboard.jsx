@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import { Camera, Zap, CheckCircle, XCircle, LogOut } from 'lucide-react';
+import { Camera, Zap, CheckCircle, XCircle, LogOut, Map, LayoutDashboard, Settings, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -69,20 +69,18 @@ export default function Dashboard() {
   const itemVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } } };
 
   return (
-    <div className="p-4 md:p-8 max-w-sm md:max-w-md mx-auto space-y-6 min-h-screen flex flex-col relative overflow-hidden">
-      
+    <div className="flex h-screen bg-transparent overflow-hidden">
+      {/* Proof Alert Modal */}
       <AnimatePresence>
         {proofAlert && (
             <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
             >
                 <motion.div 
                   initial={{ scale: 0.8, y: 50 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.8, opacity: 0 }}
                   transition={{ type: "spring", bounce: 0.4 }}
-                  className="glass-card p-6 w-full max-w-sm border-warning shadow-[0_0_30px_rgba(255,176,0,0.2)]"
+                  className="glass-card p-6 w-full max-w-md border-warning shadow-[0_0_30px_rgba(255,176,0,0.2)]"
                 >
                     <h2 className="text-xl font-orbitron text-warning mb-2 flex items-center gap-2">
                        <Camera className="text-warning"/> Action Required
@@ -90,21 +88,21 @@ export default function Dashboard() {
                     <p className="text-sm text-slate-300 mb-4">AI Validated Match: Mechanic uploaded proof of damage for review.</p>
                     
                     <div className="bg-black/50 p-4 rounded-xl mb-6 relative overflow-hidden">
-                        <img src={proofAlert.imageUrl || "https://res.cloudinary.com/demo/image/upload/sample.jpg"} alt="Proof" className="w-full h-32 object-cover rounded-lg mb-2 opacity-80" />
+                        <img src={proofAlert.imageUrl || "https://res.cloudinary.com/demo/image/upload/sample.jpg"} alt="Proof" className="w-full h-48 object-cover rounded-lg mb-4 opacity-80" />
                         <motion.div 
                           className="absolute top-0 left-0 w-full h-1 bg-primary shadow-[0_0_10px_#00F2FF]"
                           animate={{ top: ['0%', '100%', '0%'] }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                         />
-                        <p className="text-sm font-semibold">{proofAlert.description}</p>
-                        <p className="text-xl font-orbitron text-primary mt-2">₹{proofAlert.estimatedCost}</p>
+                        <p className="text-base font-semibold">{proofAlert.description}</p>
+                        <p className="text-2xl font-orbitron text-primary mt-2">₹{proofAlert.estimatedCost}</p>
                     </div>
 
                     <div className="flex gap-4">
-                        <button onClick={() => resolveProof('REJECTED')} className="glass-button-danger flex-1 flex items-center justify-center gap-2">
-                          <XCircle size={18}/> REJECT
+                        <button onClick={() => resolveProof('REJECTED')} className="glass-button-danger flex-1 flex items-center justify-center gap-2 py-4">
+                          <XCircle size={20}/> REJECT
                         </button>
-                        <button onClick={() => resolveProof('APPROVED')} className="glass-button-success flex-1 flex items-center justify-center gap-2">
-                          <CheckCircle size={18}/> APPROVE
+                        <button onClick={() => resolveProof('APPROVED')} className="glass-button-success flex-1 flex items-center justify-center gap-2 py-4">
+                          <CheckCircle size={20}/> APPROVE
                         </button>
                     </div>
                 </motion.div>
@@ -112,84 +110,119 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
-      <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-4 pt-4 flex justify-between items-start">
+      {/* Side Navigation */}
+      <motion.aside 
+        initial={{ x: -100 }} animate={{ x: 0 }}
+        className="w-20 lg:w-64 h-full glass-card border-none rounded-none border-r border-white/5 flex flex-col justify-between py-8 px-4 z-10 hidden md:flex"
+      >
         <div>
-          <h1 className="text-3xl font-orbitron font-bold text-white tracking-widest flex flex-col">
-            NEXUS<span className="text-primary drop-shadow-[0_0_8px_#00F2FF]">-V</span>
+          <h1 className="text-2xl lg:text-3xl font-orbitron font-bold text-white tracking-widest flex items-center justify-center lg:justify-start gap-2 mb-12">
+            <Zap className="text-primary hidden lg:block" /> N<span className="text-primary">-V</span>
           </h1>
-          <p className="text-xs text-secondary font-inter mt-1 tracking-widest text-primary/80">SMART MOBILITY</p>
+          <nav className="space-y-4">
+            <a href="#" className="flex items-center gap-4 text-primary bg-primary/10 p-4 rounded-xl border border-primary/20">
+              <LayoutDashboard size={24} />
+              <span className="hidden lg:block font-bold">Terminal</span>
+            </a>
+            <a href="#" className="flex items-center gap-4 text-slate-400 hover:text-white p-4 rounded-xl hover:bg-white/5 transition-all">
+              <Map size={24} />
+              <span className="hidden lg:block font-bold">Map View</span>
+            </a>
+            <a href="#" className="flex items-center gap-4 text-slate-400 hover:text-white p-4 rounded-xl hover:bg-white/5 transition-all">
+              <UserIcon size={24} />
+              <span className="hidden lg:block font-bold">Profile</span>
+            </a>
+          </nav>
         </div>
-        <button onClick={handleLogout} className="text-slate-400 hover:text-white transition-colors p-2 bg-white/5 rounded-full border border-white/10">
-          <LogOut size={20} />
+        <button onClick={handleLogout} className="flex items-center justify-center lg:justify-start gap-4 text-danger hover:text-danger/80 p-4 rounded-xl hover:bg-danger/10 transition-all w-full">
+          <LogOut size={24} />
+          <span className="hidden lg:block font-bold">Disconnect</span>
         </button>
-      </motion.header>
+      </motion.aside>
 
-      {user && (
-        <motion.p initial={{opacity:0}} animate={{opacity:1}} className="text-sm text-slate-300">
-          Welcome back, <span className="text-primary font-bold">{user.name}</span>
-        </motion.p>
-      )}
+      {/* Main Content */}
+      <main className="flex-1 h-full overflow-y-auto p-4 md:p-8 relative z-0">
+        <header className="flex justify-between items-center mb-8 flex-wrap gap-4 md:hidden">
+          <h1 className="text-2xl font-orbitron font-bold text-white tracking-widest flex items-center">
+            NEXUS<span className="text-primary">-V</span>
+          </h1>
+          <button onClick={handleLogout} className="text-slate-400 p-2 glass-card rounded-full"><LogOut size={20}/></button>
+        </header>
 
-      <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-4 flex-1 pb-8">
-        
-        <motion.div variants={itemVariants} className="glass-card p-5 border-l-4 border-l-primary hover:bg-white/10 transition-colors">
-            <div className="flex justify-between items-start mb-4">
-                <div>
-                    <h3 className="font-orbitron font-bold text-lg text-white">QuickWash Downtown</h3>
-                    <p className="text-xs text-slate-400">0.8 km away • 15 min avg wait</p>
-                </div>
-                <motion.div 
-                  key={queueLength} initial={{ scale: 1.5, color: '#fff' }} animate={{ scale: 1, color: '#00F2FF' }}
-                  className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold border border-primary/30 shadow-[0_0_10px_rgba(0,242,255,0.2)]"
-                >
-                    {queueLength} AHEAD
-                </motion.div>
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold font-inter mb-2 text-white">Welcome, {user?.name || 'Commander'}</h2>
+          <p className="text-slate-400">System architecture online. All nearby nodes are operational.</p>
+        </div>
+
+        {/* Bento Grid layout */}
+        <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-min">
+          
+          {/* QuickWash Card - Big Span */}
+          <motion.div variants={itemVariants} className="glass-card p-6 border-t-4 border-t-primary lg:col-span-2 row-span-2 flex flex-col justify-between group">
+            <div>
+              <div className="flex justify-between items-start mb-6">
+                  <div>
+                      <h3 className="font-orbitron font-bold text-3xl text-white mb-2">QuickWash Hub</h3>
+                      <p className="text-sm text-slate-400">0.8 km away • Automated Zero-Wait Line</p>
+                  </div>
+                  <motion.div 
+                    key={queueLength} initial={{ scale: 1.5, color: '#fff' }} animate={{ scale: 1, color: '#00F2FF' }}
+                    className="bg-primary/20 text-primary px-4 py-2 rounded-xl text-lg font-bold border border-primary/30 shadow-[0_0_15px_rgba(0,242,255,0.2)]"
+                  >
+                      {queueLength} AHEAD
+                  </motion.div>
+              </div>
+              <p className="text-slate-300 text-sm max-w-md leading-relaxed mb-8">
+                Tired of waiting? Join our AI-regulated live queue. We use dynamic slotting to guarantee you arrive exactly when a wash bay opens up.
+              </p>
             </div>
             {inQueue ? (
-                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full text-center py-3 bg-success/20 text-success rounded-xl font-orbitron tracking-widest border border-success/30 font-bold shadow-[0_0_15px_rgba(57,255,20,0.2)]">
-                    IN QUEUE
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full text-center py-4 bg-success/20 text-success rounded-xl font-orbitron tracking-widest border border-success/30 font-bold shadow-[0_0_15px_rgba(57,255,20,0.2)] text-xl">
+                    QUEUE POSITION LOCKED
                 </motion.div>
             ) : (
-                <button onClick={joinWashQueue} className="glass-button w-full py-3">JOIN LIVE QUEUE</button>
+                <button onClick={joinWashQueue} className="glass-button w-full py-4 text-lg">ENTER LIVE QUEUE</button>
             )}
-        </motion.div>
+          </motion.div>
 
-        <motion.div variants={itemVariants} className="glass-card p-5 border-l-4 border-l-success hover:bg-white/10 transition-colors">
-            <div className="flex justify-between items-start mb-4">
-                <div>
-                    <h3 className="font-orbitron font-bold text-lg text-white">EV Charge Hub East</h3>
-                    <p className="text-xs text-slate-400">1.2 km away • 50kW DC</p>
-                </div>
-                <Zap className={evStatus === 'AVAILABLE' ? "text-success drop-shadow-[0_0_8px_rgba(57,255,20,0.8)]" : "text-warning drop-shadow-[0_0_8px_rgba(255,176,0,0.8)]"} size={20} />
+          {/* EV Card */}
+          <motion.div variants={itemVariants} className="glass-card p-6 border-t-4 border-t-success flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-start mb-6">
+                  <h3 className="font-orbitron font-bold text-xl text-white">EV Charge Sector</h3>
+                  <Zap className={evStatus === 'AVAILABLE' ? "text-success drop-shadow-[0_0_12px_rgba(57,255,20,0.8)]" : "text-warning drop-shadow-[0_0_12px_rgba(255,176,0,0.8)]"} size={28} />
+              </div>
+              <p className="text-sm text-slate-400 mb-6">1.2 km away • 50kW DC Fast Charge</p>
+              <div className="mb-8">
+                  <p className="text-xs text-slate-500 mb-2 uppercase tracking-wider">Node Status</p>
+                  <motion.p key={evStatus} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className={`font-orbitron font-bold text-2xl ${evStatus==='AVAILABLE'?'text-success':evStatus==='BOOKED'?'text-warning':'text-danger'}`}>
+                    {evStatus}
+                  </motion.p>
+              </div>
             </div>
-            
-            <div className="flex items-center gap-4">
-                <div className="flex-1">
-                    <p className="text-xs text-slate-400 mb-1">Status</p>
-                    <motion.p key={evStatus} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className={`font-orbitron font-bold text-sm ${evStatus==='AVAILABLE'?'text-success':evStatus==='BOOKED'?'text-warning':'text-danger'}`}>
-                      {evStatus}
-                    </motion.p>
-                </div>
-                {evStatus === 'AVAILABLE' ? (
-                    <button onClick={reserveEVSlot} className="glass-button px-6 text-sm py-3">RESERVE (15m)</button>
-                ) : (
-                    <button disabled className="glass-button opacity-50 cursor-not-allowed px-6 text-sm py-3 border-slate-500 text-slate-500 hover:bg-transparent shadow-none">UNAVAILABLE</button>
-                )}
-            </div>
-        </motion.div>
+            {evStatus === 'AVAILABLE' ? (
+                <button onClick={reserveEVSlot} className="glass-button w-full py-3">RESERVE (15m)</button>
+            ) : (
+                <button disabled className="glass-button w-full py-3 opacity-50 cursor-not-allowed border-slate-500 text-slate-500 bg-transparent shadow-none hover:bg-transparent">UNAVAILABLE</button>
+            )}
+          </motion.div>
 
-        <motion.div variants={itemVariants} className="glass-card p-5 border-l-4 border-l-warning hover:bg-white/10 transition-colors">
-            <div className="flex justify-between items-start mb-4">
-                <div>
-                    <h3 className="font-orbitron font-bold text-lg text-white">Honest Fix Auto</h3>
-                    <p className="text-xs text-slate-400">2.5 km away • Trust Engine Active</p>
-                </div>
-                <Camera className="text-warning drop-shadow-[0_0_8px_rgba(255,176,0,0.8)]" size={20} />
+          {/* Trust Engine Card */}
+          <motion.div variants={itemVariants} className="glass-card p-6 border-t-4 border-t-warning flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-start mb-6">
+                  <h3 className="font-orbitron font-bold text-xl text-white">Trust Engine</h3>
+                  <Camera className="text-warning drop-shadow-[0_0_12px_rgba(255,176,0,0.8)]" size={28} />
+              </div>
+              <p className="text-sm text-slate-400 mb-4">Partner: Honest Fix Auto</p>
+              <div className="bg-warning/10 border border-warning/20 p-4 rounded-xl">
+                <p className="text-sm text-warning font-semibold italic">Vehicle currently in bay. AI monitors active.</p>
+              </div>
             </div>
-            <p className="text-xs italic text-slate-500 mt-2">Your vehicle is currently being serviced. Real-time updates active.</p>
+          </motion.div>
+          
         </motion.div>
-
-      </motion.div>
+      </main>
     </div>
   );
 }
