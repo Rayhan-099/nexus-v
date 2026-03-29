@@ -25,6 +25,7 @@ app.use((req, res, next) => {
 });
 
 // Define Routes
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/partners', require('./routes/partners'));
 app.use('/api/trust', require('./routes/trust'));
 

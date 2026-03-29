@@ -19,7 +19,11 @@ router.get('/nearby', async (req, res) => {
 // Used to seed quick data for hackathon MVP test
 router.post('/seed', async (req, res) => {
   try {
+    // Clear existing for clean demo
+    await Partner.deleteMany({});
+    
     const p1 = new Partner({
+      _id: "000000000000000000000000",
       businessName: "QuickWash Downtown",
       type: "WASH",
       location: { lat: 12.9716, lng: 77.5946 },
