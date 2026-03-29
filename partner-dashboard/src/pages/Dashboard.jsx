@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import { Camera, Zap, Car, LogOut, LayoutDashboard, Settings, User as UserIcon } from 'lucide-react';
+import { Camera, Zap, Car, LogOut, LayoutDashboard, Settings, User as UserIcon, Brain, ShieldCheck, ShieldAlert, ShieldX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,9 @@ export default function Dashboard() {
   const [evStatus, setEvStatus] = useState('AVAILABLE');
   const [proofFile, setProofFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState('');
+  const [aiResult, setAiResult] = useState(null);
+  const [proofDescription, setProofDescription] = useState('Brake pad replacement');
+  const [isUploading, setIsUploading] = useState(false);
   
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
@@ -54,11 +57,13 @@ export default function Dashboard() {
 
   const handleUpload = async () => {
     if (!proofFile) return alert('Select a file first');
-    setUploadStatus('Validating via AI...');
+    setIsUploading(true);
+    setUploadStatus('🤖 Analyzing image with Gemini AI...');
+    setAiResult(null);
     const formData = new FormData();
     formData.append('image', proofFile);
     formData.append('partnerId', MOCK_PARTNER_ID);
-    formData.append('description', 'Brake pad replacement');
+    formData.append('description', proofDescription);
     formData.append('estimatedCost', 4500);
 
     try {
@@ -68,13 +73,16 @@ export default function Dashboard() {
       });
       const data = await res.json();
       if (res.ok) {
-         setUploadStatus('Sent to customer! Waiting for approval...');
+         setUploadStatus('✅ AI Approved! Sent to customer.');
+         setAiResult(data.proof?.aiAnalysis);
       } else {
-         setUploadStatus(`Rejected: ${data.error} - ${data.reason||''}`);
+         setUploadStatus(`❌ ${data.error}`);
+         setAiResult(data.aiAnalysis);
       }
     } catch(e) {
-      setUploadStatus('Mock: Requires python engine. Sending fake alert... ');
-      socket.emit('proof_received', { status: 'PENDING', estimatedCost: 4500, description: 'Brake pad replacement' });
+      setUploadStatus('⚠️ Network error. Try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -183,16 +191,22 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Trust Engine Card */}
-          <motion.div variants={cardVariants} className="glass-card p-6 border-t-4 border-t-warning flex flex-col justify-between">
+          {/* Trust Engine Card - Now with AI */}
+          <motion.div variants={cardVariants} className="glass-card p-6 border-t-4 border-t-warning flex flex-col justify-between row-span-2">
             <div>
-              <div className="flex justify-between items-start mb-6">
-                  <h2 className="text-xl font-orbitron font-bold text-white">Trust Engine</h2>
+              <div className="flex justify-between items-start mb-4">
+                  <h2 className="text-xl font-orbitron font-bold text-white flex items-center gap-2"><Brain className="w-5 h-5 text-warning" /> Trust Engine</h2>
                   <Camera className="w-8 h-8 text-warning drop-shadow-[0_0_10px_rgba(255,176,0,0.8)]" />
               </div>
-              <p className="text-slate-400 text-sm mb-6">Upload photographic proof of damages to auto-generate verified customer estimates.</p>
+              <p className="text-slate-400 text-xs mb-4">Powered by <span className="text-warning font-bold">Google Gemini AI</span> — Real-time image analysis for vehicle damage assessment.</p>
               
-              <div className="bg-black/30 p-4 border border-white/5 rounded-xl mb-6 flex flex-col items-center justify-center border-dashed group-hover:bg-warning/5 transition-colors">
+              <input 
+                type="text" value={proofDescription} onChange={(e) => setProofDescription(e.target.value)}
+                placeholder="Describe the repair..."
+                className="glass-input w-full mb-3 text-sm py-2"
+              />
+
+              <div className="bg-black/30 p-3 border border-white/5 rounded-xl mb-4 border-dashed">
                 <input 
                   type="file" accept="image/*" onChange={(e) => setProofFile(e.target.files[0])}
                   className="w-full text-sm text-slate-400
@@ -201,14 +215,58 @@ export default function Dashboard() {
                 />
               </div>
 
-              <motion.button whileTap={{ scale: 0.98 }} onClick={handleUpload} className="glass-button w-full border-warning text-warning hover:bg-warning/20 shadow-[0_0_15px_rgba(255,176,0,0.2)]">
-                UPLOAD & VALIDATE
+              <motion.button 
+                whileTap={{ scale: 0.98 }} onClick={handleUpload} disabled={isUploading}
+                className="glass-button w-full border-warning text-warning hover:bg-warning/20 shadow-[0_0_15px_rgba(255,176,0,0.2)] disabled:opacity-50"
+              >
+                {isUploading ? (
+                  <span className="flex items-center justify-center gap-2"><div className="w-4 h-4 border-2 border-warning border-t-transparent rounded-full animate-spin" /> ANALYZING...</span>
+                ) : 'UPLOAD & VALIDATE'}
               </motion.button>
               
               <AnimatePresence>
                 {uploadStatus && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-4 text-sm font-bold text-center text-warning bg-warning/10 p-2 rounded-lg border border-warning/20">
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-3 text-sm font-bold text-center text-warning bg-warning/10 p-2 rounded-lg border border-warning/20">
                     {uploadStatus}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* AI Analysis Result Panel */}
+              <AnimatePresence>
+                {aiResult && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs uppercase tracking-widest text-slate-400">AI Verdict</span>
+                      <span className={`flex items-center gap-1 font-orbitron font-bold text-sm px-3 py-1 rounded-full border ${
+                        aiResult.aiVerdict === 'APPROVED' ? 'text-success bg-success/10 border-success/30' :
+                        aiResult.aiVerdict === 'FLAGGED' ? 'text-warning bg-warning/10 border-warning/30' :
+                        'text-danger bg-danger/10 border-danger/30'
+                      }`}>
+                        {aiResult.aiVerdict === 'APPROVED' ? <ShieldCheck size={14}/> : aiResult.aiVerdict === 'FLAGGED' ? <ShieldAlert size={14}/> : <ShieldX size={14}/>}
+                        {aiResult.aiVerdict}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-black/30 p-2 rounded-lg text-center">
+                        <p className="text-[10px] text-slate-500 uppercase">Confidence</p>
+                        <p className="font-orbitron text-lg text-primary font-bold">{aiResult.confidence}%</p>
+                      </div>
+                      <div className="bg-black/30 p-2 rounded-lg text-center">
+                        <p className="text-[10px] text-slate-500 uppercase">Severity</p>
+                        <p className={`font-orbitron text-lg font-bold ${
+                          aiResult.severity === 'CRITICAL' ? 'text-danger' : aiResult.severity === 'HIGH' ? 'text-warning' : aiResult.severity === 'MEDIUM' ? 'text-primary' : 'text-success'
+                        }`}>{aiResult.severity}</p>
+                      </div>
+                    </div>
+                    <div className="bg-black/30 p-3 rounded-lg">
+                      <p className="text-[10px] text-slate-500 uppercase mb-1">Damage Type</p>
+                      <p className="text-sm text-white">{aiResult.damageType}</p>
+                    </div>
+                    <div className="bg-black/30 p-3 rounded-lg">
+                      <p className="text-[10px] text-slate-500 uppercase mb-1">AI Reasoning</p>
+                      <p className="text-xs text-slate-300 italic">{aiResult.reasoning}</p>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

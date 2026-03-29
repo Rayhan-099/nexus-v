@@ -80,15 +80,17 @@ export default function Dashboard() {
                 <motion.div 
                   initial={{ scale: 0.8, y: 50 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.8, opacity: 0 }}
                   transition={{ type: "spring", bounce: 0.4 }}
-                  className="glass-card p-6 w-full max-w-md border-warning shadow-[0_0_30px_rgba(255,176,0,0.2)]"
+                  className="glass-card p-6 w-full max-w-lg border-warning shadow-[0_0_30px_rgba(255,176,0,0.2)]"
                 >
                     <h2 className="text-xl font-orbitron text-warning mb-2 flex items-center gap-2">
-                       <Camera className="text-warning"/> Action Required
+                       <Camera className="text-warning"/> AI Trust Alert
                     </h2>
-                    <p className="text-sm text-slate-300 mb-4">AI Validated Match: Mechanic uploaded proof of damage for review.</p>
+                    <p className="text-sm text-slate-300 mb-4">Gemini AI has analyzed mechanic-uploaded repair evidence.</p>
                     
-                    <div className="bg-black/50 p-4 rounded-xl mb-6 relative overflow-hidden">
-                        <img src={proofAlert.imageUrl || "https://res.cloudinary.com/demo/image/upload/sample.jpg"} alt="Proof" className="w-full h-48 object-cover rounded-lg mb-4 opacity-80" />
+                    <div className="bg-black/50 p-4 rounded-xl mb-4 relative overflow-hidden">
+                        {proofAlert.imageUrl && (
+                          <img src={proofAlert.imageUrl} alt="Proof" className="w-full h-40 object-cover rounded-lg mb-3 opacity-80" />
+                        )}
                         <motion.div 
                           className="absolute top-0 left-0 w-full h-1 bg-primary shadow-[0_0_10px_#00F2FF]"
                           animate={{ top: ['0%', '100%', '0%'] }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
@@ -96,6 +98,42 @@ export default function Dashboard() {
                         <p className="text-base font-semibold">{proofAlert.description}</p>
                         <p className="text-2xl font-orbitron text-primary mt-2">₹{proofAlert.estimatedCost}</p>
                     </div>
+
+                    {/* AI Analysis Details */}
+                    {proofAlert.aiAnalysis && (
+                      <div className="mb-4 space-y-2">
+                        <div className="flex items-center justify-between bg-black/30 p-3 rounded-lg">
+                          <span className="text-xs uppercase tracking-widest text-slate-400">AI Verdict</span>
+                          <span className={`font-orbitron font-bold text-sm px-3 py-1 rounded-full border ${
+                            proofAlert.aiAnalysis.aiVerdict === 'APPROVED' ? 'text-success bg-success/10 border-success/30' :
+                            proofAlert.aiAnalysis.aiVerdict === 'FLAGGED' ? 'text-warning bg-warning/10 border-warning/30' :
+                            'text-danger bg-danger/10 border-danger/30'
+                          }`}>
+                            {proofAlert.aiAnalysis.aiVerdict}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="bg-black/30 p-2 rounded-lg text-center">
+                            <p className="text-[10px] text-slate-500 uppercase">Confidence</p>
+                            <p className="font-orbitron text-sm text-primary font-bold">{proofAlert.aiAnalysis.confidence}%</p>
+                          </div>
+                          <div className="bg-black/30 p-2 rounded-lg text-center">
+                            <p className="text-[10px] text-slate-500 uppercase">Severity</p>
+                            <p className={`font-orbitron text-sm font-bold ${
+                              proofAlert.aiAnalysis.severity === 'CRITICAL' ? 'text-danger' : proofAlert.aiAnalysis.severity === 'HIGH' ? 'text-warning' : 'text-primary'
+                            }`}>{proofAlert.aiAnalysis.severity}</p>
+                          </div>
+                          <div className="bg-black/30 p-2 rounded-lg text-center">
+                            <p className="text-[10px] text-slate-500 uppercase">Type</p>
+                            <p className="text-[11px] text-white truncate">{proofAlert.aiAnalysis.damageType}</p>
+                          </div>
+                        </div>
+                        <div className="bg-black/30 p-3 rounded-lg">
+                          <p className="text-[10px] text-slate-500 uppercase mb-1">AI Reasoning</p>
+                          <p className="text-xs text-slate-300 italic">{proofAlert.aiAnalysis.reasoning}</p>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="flex gap-4">
                         <button onClick={() => resolveProof('REJECTED')} className="glass-button-danger flex-1 flex items-center justify-center gap-2 py-4">
