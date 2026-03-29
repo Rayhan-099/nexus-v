@@ -3,12 +3,19 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const connectDB = async () => {
   try {
-    const mongoServer = await MongoMemoryServer.create();
-    const mongoURI = mongoServer.getUri();
+    let mongoURI = process.env.MONGO_URI;
+    
+    if (!mongoURI) {
+      console.log('No MONGO_URI found, starting MongoMemoryServer...');
+      const mongoServer = await MongoMemoryServer.create();
+      mongoURI = mongoServer.getUri();
+      console.log('MongoDB Memory Server using:', mongoURI);
+    }
+
     await mongoose.connect(mongoURI);
-    console.log('MongoDB Memory Server Connected at', mongoURI);
+    console.log('MongoDB Connected ✅');
   } catch (err) {
-    console.error(err.message);
+    console.error('MongoDB Connection Error:', err.message);
     process.exit(1);
   }
 };

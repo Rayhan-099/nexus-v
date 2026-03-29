@@ -98,8 +98,8 @@ export default function Dashboard() {
         className="w-20 lg:w-64 h-full glass-card border-none rounded-none border-r border-white/5 flex flex-col justify-between py-8 px-4 z-10 hidden md:flex"
       >
         <div>
-          <h1 className="text-2xl lg:text-3xl font-orbitron font-bold text-white tracking-widest flex items-center justify-center lg:justify-start gap-2 mb-12">
-            PARTNER<span className="text-primary hidden lg:block uppercase text-xs mt-2 ml-1">Node</span>
+          <h1 className="text-xl lg:text-2xl font-orbitron font-bold text-white tracking-widest flex items-center justify-center lg:justify-start gap-2 mb-12">
+            <Zap className="text-primary" size={20} /> <span className="hidden lg:inline">P</span><span className="text-primary">N</span>
           </h1>
           <nav className="space-y-4">
             <a href="#" className="flex items-center gap-4 text-primary bg-primary/10 p-4 rounded-xl border border-primary/20 shadow-[0_0_15px_rgba(0,242,255,0.1)]">
@@ -302,6 +302,43 @@ export default function Dashboard() {
             </div>
 
             <button className="glass-button-danger w-full opacity-50 cursor-not-allowed shadow-none mt-6" disabled>MANAGED BY CLIENTS</button>
+          </motion.div>
+
+          {/* Revenue Analytics Card */}
+          <motion.div variants={cardVariants} className="glass-card p-6 border-t-4 border-t-[#A855F7] lg:col-span-1 flex flex-col justify-between overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10 blur-md pointer-events-none">
+                <Brain className="w-32 h-32 text-[#A855F7]" />
+            </div>
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-6">
+                  <h2 className="text-xl font-orbitron font-bold text-white">Node Revenue</h2>
+                  <div className="p-2 bg-[#A855F7]/10 rounded-lg border border-[#A855F7]/20">
+                    <LogOut className="text-[#A855F7] rotate-180" size={20} />
+                  </div>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Net Earnings (7D)</p>
+                <h3 className="text-3xl font-orbitron font-bold text-white">₹14,250</h3>
+                <p className="text-[10px] text-success font-bold">+12% vs last week</p>
+              </div>
+
+              {/* Simple SVG Chart */}
+              <div className="flex items-end justify-between gap-1 h-24 mb-4">
+                {[40, 70, 45, 90, 65, 80, 55].map((h, i) => (
+                  <motion.div 
+                    key={i} 
+                    initial={{ height: 0 }} animate={{ height: `${h}%` }} transition={{ delay: i * 0.1 }}
+                    className={`flex-1 w-full rounded-t-sm ${h > 75 ? 'bg-primary' : 'bg-primary/40'} border-t border-primary/50 relative group`}
+                  >
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-[8px] px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">₹{h * 200}</div>
+                  </motion.div>
+                ))}
+              </div>
+              <div className="flex justify-between text-[8px] text-slate-600 uppercase font-bold px-1">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              </div>
+            </div>
           </motion.div>
 
         </motion.div>

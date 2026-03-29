@@ -1,11 +1,15 @@
 {
-  "dependencies": {
-    "autoprefixer": "^10.4.27",
-    "lucide-react": "^0.577.0",
-    "postcss": "^8.5.8",
-    "react-router-dom": "^7.13.1",
-    "socket.io-client": "^4.8.3",
-    "tailwindcss": "^4.2.2",
-    "zustand": "^5.0.12"
+  "name": "nexus-v-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend-core && npm start",
+    "dev:client": "cd client-app && npm run dev",
+    "dev:partner": "cd partner-dashboard && npm run dev",
+    "install:all": "npm install && cd backend-core && npm install && cd ../client-app && npm install && cd ../partner-dashboard && npm install",
+    "build": "echo 'Building monorepo...'"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

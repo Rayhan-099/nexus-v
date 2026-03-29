@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend-core/server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "client-app/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    },
+    {
+      "src": "partner-dashboard/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "backend-core/server.js" },
+    { "source": "/partner/(.*)", "destination": "/partner-dashboard/$1" },
+    { "source": "/(.*)", "destination": "/client-app/$1" }
+  ]
+}

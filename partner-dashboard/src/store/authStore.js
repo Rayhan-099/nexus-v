@@ -20,6 +20,10 @@ export const useAuthStore = create((set) => ({
 
       localStorage.setItem('token', data.token);
       set({ token: data.token, isAuthenticated: true, loading: false });
+      const me = await fetch('http://localhost:5000/api/auth/me', {
+        headers: { 'x-auth-token': data.token },
+      });
+      if (me.ok) set({ user: await me.json() });
     } catch (err) {
       set({ error: err.message, loading: false });
     }
@@ -38,6 +42,10 @@ export const useAuthStore = create((set) => ({
 
       localStorage.setItem('token', data.token);
       set({ token: data.token, isAuthenticated: true, loading: false });
+      const me = await fetch('http://localhost:5000/api/auth/me', {
+        headers: { 'x-auth-token': data.token },
+      });
+      if (me.ok) set({ user: await me.json() });
     } catch (err) {
       set({ error: err.message, loading: false });
     }

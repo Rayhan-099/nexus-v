@@ -227,20 +227,24 @@ export default function Dashboard() {
       >
         <div>
           <h1 className="text-2xl lg:text-3xl font-orbitron font-bold text-white tracking-widest flex items-center justify-center lg:justify-start gap-2 mb-12">
-            <Zap className="text-primary hidden lg:block" /> N<span className="text-primary">-V</span>
+            <Zap className="text-primary" size={20} /> <span className="hidden lg:inline">N</span><span className="text-primary">V</span>
           </h1>
-          <nav className="space-y-4">
-            <a href="#" className="flex items-center gap-4 text-primary bg-primary/10 p-4 rounded-xl border border-primary/20">
-              <LayoutDashboard size={24} />
-              <span className="hidden lg:block font-bold">Terminal</span>
+          <nav className="space-y-3">
+            <a href="#" className="flex items-center gap-4 text-primary bg-primary/10 p-3 rounded-xl border border-primary/20">
+              <LayoutDashboard size={22} />
+              <span className="hidden lg:block font-bold text-sm">Terminal</span>
             </a>
-            <a href="#" className="flex items-center gap-4 text-slate-400 hover:text-white p-4 rounded-xl hover:bg-white/5 transition-all">
-              <Map size={24} />
-              <span className="hidden lg:block font-bold">Map View</span>
+            <a href="#" className="flex items-center gap-4 text-[#A855F7] bg-[#A855F7]/10 p-3 rounded-xl border border-[#A855F7]/20">
+              <Wallet size={22} />
+              <span className="hidden lg:block font-bold text-sm">Wallet</span>
             </a>
-            <a href="#" className="flex items-center gap-4 text-slate-400 hover:text-white p-4 rounded-xl hover:bg-white/5 transition-all">
-              <UserIcon size={24} />
-              <span className="hidden lg:block font-bold">Profile</span>
+            <a href="#" className="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl hover:bg-white/5 transition-all">
+              <Map size={22} />
+              <span className="hidden lg:block font-bold text-sm">Map View</span>
+            </a>
+            <a href="#" className="flex items-center gap-4 text-slate-400 hover:text-white p-3 rounded-xl hover:bg-white/5 transition-all">
+              <UserIcon size={22} />
+              <span className="hidden lg:block font-bold text-sm">Profile</span>
             </a>
           </nav>
         </div>
@@ -272,7 +276,7 @@ export default function Dashboard() {
             <div>
               <div className="flex justify-between items-start mb-6">
                   <div>
-                      <h3 className="font-orbitron font-bold text-3xl text-white mb-2">QuickWash Hub</h3>
+                      <h3 className="font-orbitron font-bold text-2xl text-white mb-2">QuickWash Hub</h3>
                       <p className="text-sm text-slate-400">0.8 km away • Automated Zero-Wait Line</p>
                   </div>
                   <motion.div 
@@ -385,9 +389,32 @@ export default function Dashboard() {
                   <h3 className="font-orbitron font-bold text-xl text-white">Trust Engine</h3>
                   <Camera className="text-warning drop-shadow-[0_0_12px_rgba(255,176,0,0.8)]" size={28} />
               </div>
-              <p className="text-sm text-slate-400 mb-4">Partner: Honest Fix Auto</p>
-              <div className="bg-warning/10 border border-warning/20 p-4 rounded-xl">
-                <p className="text-sm text-warning font-semibold italic">Vehicle currently in bay. AI monitors active.</p>
+              <p className="text-sm text-slate-400 mb-4">Node: {MOCK_PARTNER_ID.slice(-6).toUpperCase()} Nexus</p>
+              
+              <AnimatePresence mode="wait">
+                {proofAlert ? (
+                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-success/10 border border-success/30 p-3 rounded-xl mb-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <ShieldCheck className="text-success" size={16}/>
+                      <span className="text-xs font-bold text-success uppercase tracking-widest">Last Verdict</span>
+                    </div>
+                    <p className="text-sm text-white font-bold">{proofAlert.analysis.verdict}</p>
+                    <p className="text-[10px] text-slate-400 mt-1">{new Date().toLocaleTimeString()}</p>
+                  </motion.div>
+                ) : (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-warning/10 border border-warning/20 p-4 rounded-xl mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                       <div className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse" />
+                       <span className="text-[10px] text-warning font-bold uppercase tracking-tighter">Active Monitoring</span>
+                    </div>
+                    <p className="text-xs text-slate-300 italic">No recent claims. System is monitoring your vehicle in real-time.</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="flex items-center justify-between text-[10px] text-slate-500 uppercase tracking-widest border-t border-white/5 pt-4">
+                <span>AI Accuracy</span>
+                <span className="text-success font-bold">99.8%</span>
               </div>
             </div>
           </motion.div>

@@ -107,15 +107,22 @@ nexus-v/
 
 ---
 
-## 📸 visual Overview
+## 📸 Visual Overview
 
-### Advanced Layout Distribution
-We've moved away from standard "centered" forms to high-impact **Split-Screen** and **Bento Grid** designs.
+### Client App Dashboard
+The customer-facing **Bento Grid** layout provides instant access to QuickWash queues, EV charging, and the **Nexus Wallet** — all with live pricing and real-time balance tracking.
 
-| Feature | Visual Preview |
-| :--- | :--- |
-| **Partner Auth** | ![Partner Register](/C:/Users/khanr/.gemini/antigravity/brain/693b7457-dbc1-4328-ade4-c9d690d5a273/partner_register_split_screen_1774793941186.png) |
-| **Partner Bento Grid** | ![Partner Dashboard](/C:/Users/khanr/.gemini/antigravity/brain/693b7457-dbc1-4328-ade4-c9d690d5a273/partner_dashboard_bento_grid_1774794013245.png) |
+![Client Dashboard](docs/screenshots/client-dashboard.png)
+
+### Wallet & Payment Flow
+Users pay for services directly from the dashboard. The wallet updates instantly with animated balance changes and a live transaction feed.
+
+![Wallet Payment](docs/screenshots/client-wallet-payment.png)
+
+### Partner Command Center
+Partners manage live queues, upload repair proofs to the **Gemini AI Trust Engine**, and monitor EV station status from a unified control panel.
+
+![Partner Dashboard](docs/screenshots/partner-dashboard.png)
 
 ---
 
